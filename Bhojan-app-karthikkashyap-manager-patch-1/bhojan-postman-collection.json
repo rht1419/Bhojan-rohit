@@ -1,0 +1,507 @@
+{
+  "info": {
+    "name": "Bhojan API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "admin_access_token", "value": "" },
+    { "key": "vendor_access_token", "value": "" },
+    { "key": "tenant_id", "value": "22191e39-730e-4ebf-8011-e483a9d992d2" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "EP-01 Register (GUEST)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_type\": \"GUEST\",\n  \"full_name\": \"Test User\",\n  \"phone\": \"+918971100269\",\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-01 Register (EMPLOYEE)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_type\": \"EMPLOYEE\",\n  \"full_name\": \"Test Employee\",\n  \"phone\": \"+918971100269\",\n  \"password\": \"Test@1234\",\n  \"email\": \"emp001@infosys.com\",\n  \"employee_id\": \"INF-EMP-001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-02 Verify OTP",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/otp/verify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+918971100269\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-03 Login Password",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login/password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+918971100269\",\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-04 Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/token/refresh",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-05 Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/logout",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-06 Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-07 Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/auth/profile",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Updated Name\",\n  \"department\": \"Engineering\",\n  \"floor\": \"3\",\n  \"building\": \"Block A\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-09 Password Reset Request",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/password/reset-request",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+918971100269\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-10 Password Reset Verify",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/password/reset-verify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+918971100269\",\n  \"otp\": \"123456\",\n  \"new_password\": \"NewPass@5678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-11 Contact Change Request",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/contact/change",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"EMAIL\",\n  \"new_value\": \"newemail@test.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-12 Contact Change Verify",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/contact/verify",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"EMAIL\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-13 Delete Account",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/auth/account",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-14 Upgrade to Employee",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/upgrade-to-employee",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"INF-EMP-009\",\n  \"work_email\": \"emp009@infosys.com\",\n  \"tenant_id\": \"{{tenant_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-15 Google SSO Redirect",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/sso/google"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "EP-35 Get All Tenants",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tenants"
+          }
+        },
+        {
+          "name": "EP-36 Get Tenant Settings",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tenants/{{tenant_id}}/settings"
+          }
+        },
+        {
+          "name": "Validate Tenant Domain",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tenants/validate",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"emp001@infosys.com\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendor",
+      "item": [
+        {
+          "name": "EP-17 Vendor Activate",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/vendor/auth/activate",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activation_token\": \"paste-token-here\",\n  \"password\": \"Vendor@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-18 Vendor Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/vendor/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+917000000003\",\n  \"password\": \"Vendor@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-19 Update Vendor Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/vendor/auth/profile",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{vendor_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"business_name\": \"Updated Kitchen\",\n  \"business_address\": \"456 Brigade Road\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"pincode\": \"560025\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Auth",
+      "item": [
+        {
+          "name": "EP-20 Admin Login Step 1 (Send OTP)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"karthik5kashyapks@gmail.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-20 Admin Login Step 2 (Verify OTP)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"karthik5kashyapks@gmail.com\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-21 Admin Permissions",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/auth/permissions",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Vendor",
+      "item": [
+        {
+          "name": "EP-27 Create Vendor",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/vendors",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+917000000004\",\n  \"email\": \"vendor4@test.com\",\n  \"full_name\": \"Test Vendor 4\",\n  \"business_name\": \"Test Kitchen 4\",\n  \"business_address\": \"123 MG Road\",\n  \"city\": \"Bangalore\",\n  \"state\": \"Karnataka\",\n  \"pincode\": \"560001\",\n  \"tenant_id\": \"{{tenant_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-28 Suspend Vendor",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/vendors/paste-vendor-id-here/suspend",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Violation of terms of service\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-29 Reactivate Vendor",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/vendors/paste-vendor-id-here/reactivate",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Issue resolved\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Employee",
+      "item": [
+        {
+          "name": "EP-22 Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/audit-logs?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "audit-logs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-23 Export Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/audit-logs/export?from_date=2026-01-01&to_date=2026-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "audit-logs", "export"],
+              "query": [
+                { "key": "from_date", "value": "2026-01-01" },
+                { "key": "to_date", "value": "2026-12-31" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-24 Bulk Upload Employees (CSV)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/employees/bulk-upload",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "tenant_id", "value": "{{tenant_id}}", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "EP-25 Get Bulk Upload Status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/employees/bulk-upload/paste-upload-id-here",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-26 Offboard Employee",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/employees/paste-user-id-here/offboard",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Employee resigned\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-33 Get Sessions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/sessions?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "sessions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-34 Revoke Session",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/admin/sessions/paste-session-id-here",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Delegation",
+      "item": [
+        {
+          "name": "EP-30 Create Delegation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/delegations",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delegatee_id\": \"paste-user-id-here\",\n  \"module\": \"VENDOR\",\n  \"reason\": \"Out of office\",\n  \"expires_at\": \"2026-05-01T00:00:00.000Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EP-31 Get Delegations",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/delegations",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        },
+        {
+          "name": "EP-32 Revoke Delegation",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/admin/delegations/paste-delegation-id-here",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,832 @@
+<<<<<<< HEAD
+=======
+// ============================================
+// BHOJAN APP — Prisma Schema
+// Module 1: Authentication & User Management
+// Database: PostgreSQL via Supabase
+// Version: 4.2 — PRODUCTION LOCKED
+// ============================================
+
+>>>>>>> 9164b54b7ae96a96dfb046b32a6f1d92bc55e577
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+<<<<<<< HEAD
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Tenant {
+  id                     String                @id @default(uuid())
+  name                   String
+  domain                 String                @unique
+  schema_name            String?
+  logo_url               String?
+  is_active              Boolean               @default(true)
+  created_at             DateTime              @default(now())
+  updated_at             DateTime              @updatedAt
+  audit_logs             AuditLog[]
+  bulk_upload_logs       BulkUploadLog[]
+  employee_roster        EmployeeRoster[]
+  guest_upgrade_requests GuestUpgradeRequest[]
+  settings               TenantSettings?
+  users                  User[]
+
+  @@map("tenants")
+}
+
+model TenantSettings {
+  id                    String   @id @default(uuid())
+  tenant_id             String   @unique
+  subsidy_per_meal      Decimal? @db.Decimal(10, 2)
+  subsidy_per_day_limit Decimal? @db.Decimal(10, 2)
+  subsidy_reset_cycle   String?
+  meal_window_start     String?
+  meal_window_end       String?
+  wallet_enabled        Boolean  @default(false)
+  max_wallet_balance    Decimal? @db.Decimal(10, 2)
+  config                Json?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+model User {
+  id                      String                  @id @default(uuid())
+  tenant_id               String?
+  phone                   String                  @unique
+  email                   String?                 @unique
+  password_hash           String?
+  full_name               String
+  role                    Role
+  sso_provider            SSOProvider?
+  sso_provider_id         String?
+  employee_id             String?
+  is_employee             Boolean                 @default(false)
+  can_place_orders        Boolean                 @default(true)
+  is_active               Boolean                 @default(true)
+  is_verified             Boolean                 @default(false)
+  is_suspended            Boolean                 @default(false)
+  is_deleted              Boolean                 @default(false)
+  suspended_at            DateTime?
+  suspend_reason          String?
+  reactivated_at          DateTime?
+  deleted_at              DateTime?
+  deactivated_at          DateTime?
+  last_login_at           DateTime?
+  created_at              DateTime                @default(now())
+  updated_at              DateTime                @updatedAt
+  deletion_request        AccountDeletionRequest?
+  audit_logs              AuditLog[]
+  bulk_upload_logs        BulkUploadLog[]         @relation("UploadedBy")
+  contact_change_requests ContactChangeRequest[]
+  delegations_received    Delegation[]            @relation("delegatee")
+  delegations_given       Delegation[]            @relation("delegator")
+  uploaded_rosters        EmployeeRoster[]        @relation("RosterUploadedBy")
+  guest_upgrade_requests  GuestUpgradeRequest?
+  sessions                Session[]
+  profile                 UserProfile?
+  tenant                  Tenant?                 @relation(fields: [tenant_id], references: [id])
+  vendor_profile          VendorProfile?
+  actioned_suspensions    VendorSuspensionLog[]   @relation("ActionedSuspensions")
+  vendor_suspensions      VendorSuspensionLog[]   @relation("VendorSuspensions")
+
+  @@index([phone, is_active, is_deleted])
+  @@index([tenant_id, role])
+  @@index([tenant_id, is_employee])
+  @@map("users")
+}
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  full_name   String
+  avatar_url  String?
+  employee_id String?
+  department  String?
+  floor       String?
+  building    String?
+  preferences Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model VendorProfile {
+  id               String   @id @default(uuid())
+  user_id          String   @unique
+  business_name    String
+  gstin            String?  @unique
+  fssai_number     String?
+  business_address String?
+  city             String?
+  state            String?
+  pincode          String?
+  bank_name        String?
+  account_number   String?
+  ifsc_code        String?
+  logo_url         String?
+  is_verified      Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  category         String?
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("vendor_profiles")
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  user_id       String
+  refresh_token String   @unique
+  device        String?
+  ip_address    String?
+  is_revoked    Boolean  @default(false)
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([refresh_token])
+  @@index([user_id, is_revoked])
+  @@map("sessions")
+}
+
+model RolePermission {
+  id         String    @id @default(uuid())
+  role       Role
+  module     AppModule
+  can_create Boolean   @default(false)
+  can_read   Boolean   @default(false)
+  can_update Boolean   @default(false)
+  can_delete Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  @@unique([role, module])
+  @@index([role])
+  @@map("role_permissions")
+}
+
+model Delegation {
+  id           String    @id @default(uuid())
+  delegator_id String
+  delegatee_id String
+  module       AppModule
+  reason       String?
+  is_active    Boolean   @default(true)
+  starts_at    DateTime
+  expires_at   DateTime
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  delegatee    User      @relation("delegatee", fields: [delegatee_id], references: [id])
+  delegator    User      @relation("delegator", fields: [delegator_id], references: [id])
+
+  @@index([delegatee_id, is_active])
+  @@index([expires_at, is_active])
+  @@map("delegations")
+}
+
+model EmployeeRoster {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  employee_id String
+  email       String
+  full_name   String
+  department  String?
+  is_active   Boolean  @default(true)
+  uploaded_by String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  uploader    User?    @relation("RosterUploadedBy", fields: [uploaded_by], references: [id])
+
+  @@unique([tenant_id, employee_id])
+  @@index([tenant_id, is_active])
+  @@index([tenant_id, email])
+  @@map("employee_roster")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  user_id    String?
+  tenant_id  String?
+  action     AuditAction
+  module     AuditModule
+  target_id  String?
+  device     String?
+  old_value  Json?
+  new_value  Json?
+  ip_address String?
+  metadata   Json?
+  created_at DateTime    @default(now())
+  tenant     Tenant?     @relation(fields: [tenant_id], references: [id])
+  user       User?       @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([tenant_id])
+  @@index([action])
+  @@index([module])
+  @@index([created_at(sort: Desc)])
+  @@index([tenant_id, created_at(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model BulkUploadLog {
+  id            String       @id @default(uuid())
+  tenant_id     String
+  uploaded_by   String
+  file_name     String
+  gcs_path      String?
+  total_records Int
+  success_count Int          @default(0)
+  failed_count  Int          @default(0)
+  status        UploadStatus @default(PENDING)
+  error_details Json?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  tenant        Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  uploader      User         @relation("UploadedBy", fields: [uploaded_by], references: [id])
+
+  @@index([tenant_id, status])
+  @@index([uploaded_by])
+  @@map("bulk_upload_logs")
+}
+
+model VendorSuspensionLog {
+  id               String           @id @default(uuid())
+  vendor_id        String
+  action           SuspensionAction
+  reason           String
+  actioned_by      String
+  created_at       DateTime         @default(now())
+  actioned_by_user User             @relation("ActionedSuspensions", fields: [actioned_by], references: [id])
+  vendor           User             @relation("VendorSuspensions", fields: [vendor_id], references: [id])
+
+  @@index([vendor_id])
+  @@index([actioned_by])
+  @@map("vendor_suspension_logs")
+}
+
+model AccountDeletionRequest {
+  id            String         @id @default(uuid())
+  user_id       String         @unique
+  reason        String?
+  status        DeletionStatus @default(PENDING)
+  requested_at  DateTime       @default(now())
+  anonymized_at DateTime?
+  completed_at  DateTime?
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
+}
+
+model ContactChangeRequest {
+  id           String        @id @default(uuid())
+  user_id      String
+  type         ContactType
+  old_value    String
+  new_value    String
+  otp_verified Boolean       @default(false)
+  status       ContactStatus @default(PENDING)
+  requested_at DateTime      @default(now())
+  completed_at DateTime?
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, status])
+  @@map("contact_change_requests")
+}
+
+model GuestUpgradeRequest {
+  id           String        @id @default(uuid())
+  user_id      String        @unique
+  employee_id  String
+  work_email   String
+  tenant_id    String
+  status       UpgradeStatus @default(PENDING)
+  requested_at DateTime      @default(now())
+  completed_at DateTime?
+  tenant       Tenant        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("guest_upgrade_requests")
+}
+=======
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+>>>>>>> 9164b54b7ae96a96dfb046b32a6f1d92bc55e577
+
+enum Role {
+  SUPER_ADMIN
+  TECH_ADMIN
+  OPS_ADMIN
+  VENDOR
+  USER
+  GUEST
+}
+
+enum SSOProvider {
+  GOOGLE
+  MICROSOFT
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SuspensionAction {
+  SUSPENDED
+  REACTIVATED
+}
+
+enum DeletionStatus {
+  PENDING
+  ANONYMIZED
+  COMPLETED
+}
+
+enum ContactType {
+  EMAIL
+  PHONE
+}
+
+enum ContactStatus {
+  PENDING
+  VERIFIED
+  COMPLETED
+  REJECTED
+}
+
+enum UpgradeStatus {
+  PENDING
+  VERIFIED
+  COMPLETED
+  REJECTED
+}
+
+enum AppModule {
+  AUTH
+  VENDOR
+  ORDER
+  MENU
+  REPORT
+  SETTINGS
+  EMPLOYEE
+  DELEGATION
+  TENANT
+  SESSION
+  FINANCE
+}
+
+enum AuditModule {
+  AUTH
+  VENDOR
+  DELEGATION
+  EMPLOYEE
+  SESSION
+  PROFILE
+  ACCOUNT
+}
+
+enum AuditAction {
+  USER_REGISTER
+  GUEST_REGISTER
+  VENDOR_REGISTER
+  PROFILE_UPGRADED
+  USER_LOGIN
+  GUEST_LOGIN
+  VENDOR_LOGIN
+  VENDOR_ACTIVATED
+  ADMIN_LOGIN
+  USER_LOGOUT
+  VENDOR_LOGOUT
+  ADMIN_LOGOUT
+  SSO_LOGIN
+  OTP_REQUESTED
+  OTP_VERIFIED
+  OTP_FAILED
+  EMAIL_VERIFIED
+  TOKEN_REFRESH
+  SESSION_REVOKED
+  ALL_SESSIONS_REVOKED
+  AUTH_LOGIN_FAILED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET
+  PROFILE_UPDATED
+  EMAIL_CHANGED
+  PHONE_CHANGED
+  CONTACT_CHANGED
+  ACCOUNT_DELETED
+  ACCOUNT_ANONYMIZED
+  OFFBOARDING_DEACTIVATION
+  EMPLOYEE_OFFBOARDED
+  VENDOR_SUSPENDED
+  VENDOR_REACTIVATED
+  BULK_EMPLOYEE_UPLOAD
+  DELEGATE_GRANTED
+  DELEGATE_REVOKED
+}
+<<<<<<< HEAD
+=======
+
+// ============================================
+// TABLE 1 — TENANTS
+// ============================================
+
+model Tenant {
+  id         String  @id @default(uuid())
+  name       String
+  domain     String  @unique
+  schema_name String?
+  logo_url   String?
+  is_active  Boolean @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users                  User[]
+  employee_roster        EmployeeRoster[]
+  audit_logs             AuditLog[]
+  bulk_upload_logs       BulkUploadLog[]
+  settings               TenantSettings?
+  guest_upgrade_requests GuestUpgradeRequest[]
+
+  @@map("tenants")
+}
+
+// ============================================
+// TABLE 1b — TENANT SETTINGS
+// ============================================
+
+model TenantSettings {
+  id                    String   @id @default(uuid())
+  tenant_id             String   @unique
+  subsidy_per_meal      Decimal? @db.Decimal(10, 2)
+  subsidy_per_day_limit Decimal? @db.Decimal(10, 2)
+  subsidy_reset_cycle   String?
+  meal_window_start     String?
+  meal_window_end       String?
+  wallet_enabled        Boolean  @default(false)
+  max_wallet_balance    Decimal? @db.Decimal(10, 2)
+  config                Json?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+// ============================================
+// TABLE 2 — USERS
+// ============================================
+
+model User {
+  id              String      @id @default(uuid())
+  tenant_id       String?
+  phone           String      @unique
+  email           String?     @unique
+  password_hash   String?
+  full_name       String
+  role            Role
+  sso_provider    SSOProvider?
+  sso_provider_id String?
+  employee_id     String?
+  is_employee     Boolean     @default(false)
+  can_place_orders Boolean    @default(true)
+  is_active       Boolean     @default(true)
+  is_verified     Boolean     @default(false)
+  is_suspended    Boolean     @default(false)
+  is_deleted      Boolean     @default(false)
+  suspended_at    DateTime?
+  suspend_reason  String?
+  reactivated_at  DateTime?
+  deleted_at      DateTime?
+  deactivated_at  DateTime?
+  last_login_at   DateTime?
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  tenant                  Tenant?                @relation(fields: [tenant_id], references: [id])
+  profile                 UserProfile?
+  vendor_profile          VendorProfile?
+  sessions                Session[]
+  audit_logs              AuditLog[]
+  delegations_given       Delegation[]           @relation("delegator")
+  delegations_received    Delegation[]           @relation("delegatee")
+  deletion_request        AccountDeletionRequest?
+  contact_change_requests ContactChangeRequest[]
+  guest_upgrade_requests  GuestUpgradeRequest[]
+  vendor_suspensions      VendorSuspensionLog[]  @relation("VendorSuspensions")
+  actioned_suspensions    VendorSuspensionLog[]  @relation("ActionedSuspensions")
+  bulk_upload_logs        BulkUploadLog[]        @relation("UploadedBy")
+  uploaded_rosters        EmployeeRoster[]       @relation("RosterUploadedBy")
+
+  @@index([phone, is_active, is_deleted])
+  @@index([tenant_id, role])
+  @@index([tenant_id, is_employee])
+
+  @@map("users")
+}
+
+// ============================================
+// TABLE 3 — USER PROFILES
+// ============================================
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  full_name   String
+  avatar_url  String?
+  employee_id String?
+  department  String?
+  floor       String?
+  building    String?
+  preferences Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// ============================================
+// TABLE 4 — VENDOR PROFILES
+// ============================================
+
+model VendorProfile {
+  id               String   @id @default(uuid())
+  user_id          String   @unique
+  business_name    String
+  gstin            String?  @unique
+  fssai_number     String?
+  business_address String
+  city             String
+  state            String
+  pincode          String
+  bank_name        String?
+  account_number   String?
+  ifsc_code        String?
+  logo_url         String?
+  is_verified      Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("vendor_profiles")
+}
+
+// ============================================
+// TABLE 5 — SESSIONS
+// ============================================
+
+model Session {
+  id            String   @id @default(uuid())
+  user_id       String
+  refresh_token String   @unique
+  device        String?
+  ip_address    String?
+  is_revoked    Boolean  @default(false)
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([refresh_token])
+  @@index([user_id, is_revoked])
+
+  @@map("sessions")
+}
+
+// ============================================
+// TABLE 6 — ROLE PERMISSIONS
+// ============================================
+
+model RolePermission {
+  id         String    @id @default(uuid())
+  role       Role
+  module     AppModule
+  can_create Boolean   @default(false)
+  can_read   Boolean   @default(false)
+  can_update Boolean   @default(false)
+  can_delete Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  @@unique([role, module])
+  @@index([role])
+
+  @@map("role_permissions")
+}
+
+// ============================================
+// TABLE 7 — DELEGATIONS
+// ============================================
+
+model Delegation {
+  id           String    @id @default(uuid())
+  delegator_id String
+  delegatee_id String
+  module       AppModule
+  reason       String?
+  is_active    Boolean   @default(true)
+  starts_at    DateTime
+  expires_at   DateTime
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  delegator User @relation("delegator", fields: [delegator_id], references: [id], onDelete: Restrict)
+  delegatee User @relation("delegatee", fields: [delegatee_id], references: [id], onDelete: Restrict)
+
+  @@index([delegatee_id, is_active])
+  @@index([expires_at, is_active])
+
+  @@map("delegations")
+}
+
+// ============================================
+// TABLE 8 — EMPLOYEE ROSTER
+// ============================================
+
+model EmployeeRoster {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  employee_id String
+  email       String
+  full_name   String
+  department  String?
+  is_active   Boolean  @default(true)
+  uploaded_by String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  tenant   Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  uploader User?  @relation("RosterUploadedBy", fields: [uploaded_by], references: [id], onDelete: SetNull)
+
+  @@unique([tenant_id, employee_id])
+  @@index([tenant_id, is_active])
+  @@index([tenant_id, email])
+
+  @@map("employee_roster")
+}
+
+// ============================================
+// TABLE 9 — AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  user_id    String?
+  tenant_id  String?
+  action     AuditAction
+  module     AuditModule
+  target_id  String?
+  device     String?
+  old_value  Json?
+  new_value  Json?
+  ip_address String?
+  metadata   Json?
+  created_at DateTime    @default(now())
+
+  user   User?   @relation(fields: [user_id], references: [id])
+  tenant Tenant? @relation(fields: [tenant_id], references: [id])
+
+  @@index([user_id])
+  @@index([tenant_id])
+  @@index([action])
+  @@index([module])
+  @@index([created_at(sort: Desc)])
+  @@index([tenant_id, created_at(sort: Desc)])
+
+  @@map("audit_logs")
+}
+
+// ============================================
+// TABLE 10 — BULK UPLOAD LOGS
+// ============================================
+
+model BulkUploadLog {
+  id            String       @id @default(uuid())
+  tenant_id     String
+  uploaded_by   String
+  file_name     String
+  gcs_path      String?
+  total_records Int
+  success_count Int          @default(0)
+  failed_count  Int          @default(0)
+  status        UploadStatus @default(PENDING)
+  error_details Json?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  tenant   Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  uploader User   @relation("UploadedBy", fields: [uploaded_by], references: [id], onDelete: Restrict)
+
+  @@index([tenant_id, status])
+  @@index([uploaded_by])
+
+  @@map("bulk_upload_logs")
+}
+
+// ============================================
+// TABLE 11 — VENDOR SUSPENSION LOG
+// ============================================
+
+model VendorSuspensionLog {
+  id          String           @id @default(uuid())
+  vendor_id   String
+  action      SuspensionAction
+  reason      String
+  actioned_by String
+  created_at  DateTime         @default(now())
+
+  vendor           User @relation("VendorSuspensions",   fields: [vendor_id],  references: [id], onDelete: Restrict)
+  actioned_by_user User @relation("ActionedSuspensions", fields: [actioned_by], references: [id], onDelete: Restrict)
+
+  @@index([vendor_id])
+  @@index([actioned_by])
+
+  @@map("vendor_suspension_logs")
+}
+
+// ============================================
+// TABLE 12 — ACCOUNT DELETION REQUESTS
+// ============================================
+
+model AccountDeletionRequest {
+  id            String         @id @default(uuid())
+  user_id       String         @unique
+  reason        String?
+  status        DeletionStatus @default(PENDING)
+  requested_at  DateTime       @default(now())
+  anonymized_at DateTime?
+  completed_at  DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
+}
+
+// ============================================
+// TABLE 13 — CONTACT CHANGE REQUESTS
+// ============================================
+
+model ContactChangeRequest {
+  id           String        @id @default(uuid())
+  user_id      String
+  type         ContactType
+  old_value    String
+  new_value    String
+  otp_verified Boolean       @default(false)
+  status       ContactStatus @default(PENDING)
+  requested_at DateTime      @default(now())
+  completed_at DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, status])
+
+  @@map("contact_change_requests")
+}
+
+// ============================================
+// TABLE 14 — GUEST UPGRADE REQUESTS
+// ============================================
+
+model GuestUpgradeRequest {
+  id           String        @id @default(uuid())
+  user_id      String        @unique
+  employee_id  String
+  work_email   String
+  tenant_id    String
+  status       UpgradeStatus @default(PENDING)
+  requested_at DateTime      @default(now())
+  completed_at DateTime?
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+
+  @@map("guest_upgrade_requests")
+}
+>>>>>>> 9164b54b7ae96a96dfb046b32a6f1d92bc55e577

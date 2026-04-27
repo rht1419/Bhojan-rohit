@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+firebase-service-account.json
+gcs-service-account.json
+*.pem
+coverage
+server.log
+*.log

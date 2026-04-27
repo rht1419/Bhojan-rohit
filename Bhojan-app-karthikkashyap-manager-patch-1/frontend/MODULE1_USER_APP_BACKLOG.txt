@@ -1,0 +1,29 @@
+BHOJAN USER APP - MODULE 1 BACKLOG
+-----------------------------------
+
+1. ACTUAL SSO LOGIC
+   - Currently buttons only simulate a 2-second delay.
+   - Needs integration with Google/Microsoft auth providers and backend verification.
+
+2. PROFILE AVATAR BACKEND
+   - Image picking is implemented locally.
+   - Needs actual Multipart upload to the real API (EP-08).
+
+3. LANGUAGE TRANSLATION
+   - Option is added to Edit Profile.
+   - Needs implementation of Flutter Localization (l10n) to actually change all text in the app.
+
+4. NOTIFICATION SYSTEM
+   - Toggle is added to Edit Profile.
+   - Needs Firebase Cloud Messaging (FCM) setup to receive real notifications.
+
+5. REAL OTP & SMS DELIVERY
+   - Currently simulated.
+   - Needs connection to the production API/SMS gateway.
+
+6. ADVANCED LOGIN WARNINGS
+   - Needs logic to parse "X attempts remaining" from backend error messages (AUTH-11).
+
+7. DATA PERSISTENCE
+   - Currently using Mock data.
+   - Needs connection to the real Database to save user profile changes permanently.

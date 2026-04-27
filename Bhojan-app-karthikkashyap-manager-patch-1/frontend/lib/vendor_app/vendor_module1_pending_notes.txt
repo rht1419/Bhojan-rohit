@@ -1,0 +1,8 @@
+# Vendor App Module 1 - Pending / Left Out Items
+
+* "Contact Admin" / "Contact Support" Buttons: Currently placeholders. Need deep linking to email/WhatsApp or an in-app ticketing system.
+* Session Expiry / 403 Screens: Need to be automatically triggered by API interceptors when real backend returns 401 or 403 errors.
+* Real API Integration: Switch from MockVendorAuthService to RealVendorAuthService (EP-17, 18, 19, plus new Register endpoints) once backend is live.
+* Edit Profile: The "Edit" button on the profile screen needs an actual edit form and API call.
+* Search Feature: The "Search" tab in bottom navigation is a placeholder.
+* App Language & Notifications: Similar to the User App, dynamic translation and push notifications are pending.
